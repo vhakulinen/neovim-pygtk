@@ -68,6 +68,7 @@ class GtkUI(Gtk.Window):
     def __init__(self, nvim_arg):
         """Initialize the UI instance."""
         Gtk.Window.__init__(self, title="nvim")
+        self.set_default_size(800, 480)
         self._arg = nvim_arg
         self._redraw_arg = None
         self._foreground = -1
@@ -97,13 +98,12 @@ class GtkUI(Gtk.Window):
 
     def start(self, bridge):
         """Start the UI event loop."""
-        bridge.attach(80, 24, True)
+        # This will get resized to fit the screen.
+        bridge.attach(8, 4, True)
         drawing_area = Gtk.DrawingArea()
         drawing_area.connect('draw', self._gtk_draw)
         layout = Gtk.Box(spacing=1)
 
-        # window = Gtk.Window()
-        # TODO: Set window size (needs to set nvim's size too.)
         hb = Gtk.HeaderBar()
         hb.props.title = "Neovim"
         hb.set_show_close_button(True)
@@ -149,7 +149,6 @@ class GtkUI(Gtk.Window):
         self._pango_context = drawing_area.create_pango_context()
         self._drawing_area = drawing_area
         self._layout = layout
-        # self._window = window
         self._im_context = im_context
         self._bridge = bridge
         Gtk.main()
