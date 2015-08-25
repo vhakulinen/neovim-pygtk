@@ -20,6 +20,7 @@ class UIBridge(object):
         self._error = None
         self._nvim = nvim
 
+        plugin_helper.apply_font_settings_func(self._nvim)
         plugin_helper.apply_preview_toggle_func(self._nvim)
         self._ui = ui
         self._profile = profile
@@ -102,6 +103,10 @@ class UIBridge(object):
                 self._ui.schedule_screen_update(apply_updates)
             elif method == "toggle-preview":
                 self._ui.toggle_preview()
+            elif method == "font-settings-change-size":
+                self._ui.change_font_size(updates[0])
+            elif method == "font-settings-change-font":
+                self._ui.change_font(updates[0])
 
         self._nvim.session.run(on_request, on_notification, on_setup)
         self._ui.quit()

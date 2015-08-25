@@ -17,3 +17,15 @@ def apply_preview_toggle_func(vim):
         endfunction
     """.format(chan=vim.channel_id))
     vim.command('nnoremap <leader>Q :call PyGtkTogglePreview()<CR>')
+
+
+def apply_font_settings_func(vim):
+    source(vim, """
+        function! PyGtkSetFontSize(s)
+            call rpcnotify({chan}, "font-settings-change-size", a:s)
+        endfunction
+
+        function! PyGtkSetFont(font)
+            call rpcnotify({chan}, "font-settings-change-font", a:font)
+        endfunction
+    """.format(chan=vim.channel_id))

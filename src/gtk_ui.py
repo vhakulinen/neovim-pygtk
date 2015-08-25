@@ -161,6 +161,15 @@ class GtkUI(Gtk.Window):
             self.wbwin.set_visible(False)
         GLib.timeout_add(1, self._glib_nvim_resize)
 
+    def change_font_size(self, size):
+        self._font_size = size
+        GLib.timeout_add(1, self._glib_nvim_resize)
+
+    def change_font(self, font):
+        print font
+        self._font_name = font
+        GLib.timeout_add(1, self._glib_nvim_resize)
+
     def toggle_preview(self):
         """toggle_preview is triggered from plugin_helper scripts"""
         if self._preview_switch.get_active():
