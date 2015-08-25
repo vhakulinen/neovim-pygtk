@@ -1,12 +1,13 @@
 """Neovim Gtk+ UI."""
+from threading import Thread
 import math
 
 import cairo
 
 from gi.repository import GLib, GObject, Gdk, Gtk, Pango, PangoCairo, WebKit
 
-import markdown2
 from neovim import attach
+import markdown2
 
 from .screen import Screen
 
@@ -73,7 +74,7 @@ class GtkUI(Gtk.Window):
         self._redraw_arg = None
         self._foreground = -1
         self._background = -1
-        self._font_size = 13
+        self._font_size = 12
         self._font_name = 'Monospace'
         self._screen = None
         self._attrs = None
@@ -90,9 +91,7 @@ class GtkUI(Gtk.Window):
         self.n = attach(*("socket",), **{'path': self._arg})
 
     def update_wb(self):
-        buf = ""
-        for content in self.n.current.buffer:
-            buf += content + "\n"
+        buf = "".join([content for content in self.n.current.buffer])
         m = markdown2.Markdown()
         self.wb.load_html_string(m.convert(buf), "")
 
@@ -151,6 +150,7 @@ class GtkUI(Gtk.Window):
         self._layout = layout
         self._im_context = im_context
         self._bridge = bridge
+
         Gtk.main()
 
     def preview_switch_active(self, switch, gparam):
@@ -160,6 +160,16 @@ class GtkUI(Gtk.Window):
         else:
             self.wbwin.set_visible(False)
         GLib.timeout_add(1, self._glib_nvim_resize)
+
+    def toggle_preview(self):
+        """toggle_preview is triggered from plugin_helper scripts"""
+        if self._preview_switch.get_active():
+            self._preview_switch.set_active(False)
+            self.wbwin.set_visible(False)
+        else:
+            self._preview_switch.set_active(True)
+            self.wbwin.set_visible(True)
+            self.update_wb()
 
     def quit(self):
         """Exit the UI event loop."""
@@ -605,7 +615,6 @@ class GtkUI(Gtk.Window):
             if text == ' ':
                 break
         self._pending[2] = max(rcol, self._pending[2])
-
 
 def _split_color(n):
     return ((n >> 16) & 0xff, (n >> 8) & 0xff, n & 0xff,)

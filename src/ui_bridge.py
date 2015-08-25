@@ -3,6 +3,8 @@ import sys
 from threading import Semaphore, Thread
 from traceback import format_exc
 
+import plugin_helper
+
 
 class UIBridge(object):
 
@@ -17,6 +19,8 @@ class UIBridge(object):
         self._notify = notify
         self._error = None
         self._nvim = nvim
+
+        plugin_helper.apply_preview_toggle_func(self._nvim)
         self._ui = ui
         self._profile = profile
         self._sem = Semaphore(0)
@@ -33,10 +37,6 @@ class UIBridge(object):
         """Disconnect by exiting nvim."""
         self.detach()
         self._call(self._nvim.quit)
-
-    @property
-    def nvim(self):
-        return self._nvim
 
     def input(self, input_str):
         """Send input to nvim."""
@@ -100,6 +100,8 @@ class UIBridge(object):
                     self._call(self._nvim.quit)
             if method == 'redraw':
                 self._ui.schedule_screen_update(apply_updates)
+            elif method == "toggle-preview":
+                self._ui.toggle_preview()
 
         self._nvim.session.run(on_request, on_notification, on_setup)
         self._ui.quit()
