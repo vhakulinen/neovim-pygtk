@@ -61,12 +61,13 @@ if (GLib.MAJOR_VERSION, GLib.MINOR_VERSION,) <= (2, 32,):
     GLib.threads_init()
 
 
-class GtkUI(object):
+class GtkUI(Gtk.Window):
 
     """Gtk+ UI class."""
 
     def __init__(self, nvim_arg):
         """Initialize the UI instance."""
+        Gtk.Window.__init__(self, title="nvim")
         self._arg = nvim_arg
         self._redraw_arg = None
         self._foreground = -1
@@ -101,12 +102,12 @@ class GtkUI(object):
         drawing_area.connect('draw', self._gtk_draw)
         layout = Gtk.Box(spacing=1)
 
-        window = Gtk.Window()
+        # window = Gtk.Window()
         # TODO: Set window size (needs to set nvim's size too.)
         hb = Gtk.HeaderBar()
         hb.props.title = "Neovim"
         hb.set_show_close_button(True)
-        window.set_titlebar(hb)
+        self.set_titlebar(hb)
 
         lbl = Gtk.Label()
         lbl.set_text("Preview")
@@ -117,7 +118,7 @@ class GtkUI(object):
         hb.pack_end(lbl)
         self._preview_switch = switch
 
-        window.add(layout)
+        self.add(layout)
 
         layout.pack_start(drawing_area, True, True, 0)
 
@@ -130,25 +131,25 @@ class GtkUI(object):
         self.wbwin.add(self.wb)
         layout.pack_start(self.wbwin, True, True, 0)
 
-        window.set_events(window.get_events() |
-                          Gdk.EventMask.BUTTON_PRESS_MASK |
-                          Gdk.EventMask.BUTTON_RELEASE_MASK |
-                          Gdk.EventMask.POINTER_MOTION_MASK |
-                          Gdk.EventMask.SCROLL_MASK)
-        window.connect('configure-event', self._gtk_configure)
-        window.connect('delete-event', self._gtk_quit)
-        window.connect('key-press-event', self._gtk_key)
-        window.connect('button-press-event', self._gtk_button_press)
-        window.connect('button-release-event', self._gtk_button_release)
-        window.connect('motion-notify-event', self._gtk_motion_notify)
-        window.connect('scroll-event', self._gtk_scroll)
-        window.show_all()
+        self.set_events(self.get_events() |
+                        Gdk.EventMask.BUTTON_PRESS_MASK |
+                        Gdk.EventMask.BUTTON_RELEASE_MASK |
+                        Gdk.EventMask.POINTER_MOTION_MASK |
+                        Gdk.EventMask.SCROLL_MASK)
+        self.connect('configure-event', self._gtk_configure)
+        self.connect('delete-event', self._gtk_quit)
+        self.connect('key-press-event', self._gtk_key)
+        self.connect('button-press-event', self._gtk_button_press)
+        self.connect('button-release-event', self._gtk_button_release)
+        self.connect('motion-notify-event', self._gtk_motion_notify)
+        self.connect('scroll-event', self._gtk_scroll)
+        self.show_all()
         im_context = Gtk.IMContextSimple()
         im_context.connect('commit', self._gtk_input)
         self._pango_context = drawing_area.create_pango_context()
         self._drawing_area = drawing_area
         self._layout = layout
-        self._window = window
+        # self._window = window
         self._im_context = im_context
         self._bridge = bridge
         Gtk.main()
@@ -309,7 +310,7 @@ class GtkUI(object):
         self._pending[2] = max(self._screen.col, self._pending[2])
 
     def _nvim_bell(self):
-        self._window.get_window().beep()
+        self.get_window().beep()
 
     def _nvim_visual_bell(self):
         pass
@@ -323,13 +324,13 @@ class GtkUI(object):
         self._reset_cache()
 
     def _nvim_suspend(self):
-        self._window.iconify()
+        self.iconify()
 
     def _nvim_set_title(self, title):
-        self._window.set_title(title)
+        self.set_title(title)
 
     def _nvim_set_icon(self, icon):
-        self._window.set_icon_name(icon)
+        self.set_icon_name(icon)
 
     def _gtk_draw(self, wid, cr):
         if not self._screen:
@@ -569,7 +570,7 @@ class GtkUI(object):
 
     def _glib_nvim_resize(self, *args):
         self._resize_timer_id = None
-        width, height = self._window.get_size()
+        width, height = self.get_size()
         height = self._drawing_area.get_allocated_height()
         width = self._drawing_area.get_allocated_width()
         columns = width / self._cell_pixel_width
