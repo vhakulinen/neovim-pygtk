@@ -13,3 +13,4 @@ $ python -m src.cli
 ### Features
 
 * Markdown live preview
+* Change font and font size (PyGtkSetFontSize/PyGtkSetFont)
